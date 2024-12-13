@@ -1,3 +1,8 @@
+# Personal gitignore remove
+rss-notion-venv/
+config.json
+rss_links.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
