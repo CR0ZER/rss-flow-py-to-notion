@@ -1,17 +1,15 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import feedparser
 from notion_client import Client
 from notion_client.errors import APIResponseError
 from bs4 import BeautifulSoup
 
 
-def get_rss_flow_links():
-    rss_links = []
-    with open("rss_links.txt", "r") as file:
-        for line in file:
-            rss_links.append(line.strip())
-    return rss_links
+def get_rss_links_with_tags(file_path):
+    with open(file_path, "r") as file:
+        rss_feeds = json.load(file).get("rss_feeds", {})
+    return [(link, tag) for tag, links in rss_feeds.items() for link in links]
 
 
 def make_notion_connection():
@@ -20,42 +18,27 @@ def make_notion_connection():
 
     try:
         notion = Client(auth=config["api"])
-        
-        return notion, get_database_id(notion)
+        return notion, get_database_id_by_name(notion, config["name"])
 
     except APIResponseError as e:
         print(f"[ERROR] Error while connecting to Notion: {e}")
         return None
 
 
-def get_database_id(notion):
+def get_database_id_by_name(notion, database_name):
     try:
         search_results = notion.search(
+            query=database_name,
             filter={
                 "property": "object",
                 "value": "database"
             }
         )
-        
-        if not search_results['results']:
-            print("No databases found.")
-            exit()
-        
-        databases = []
-        for db in search_results['results']:
-            db_title = db['title'][0]['plain_text'] if db['title'] else 'Untitled Database'
-            db_id = db['id']
-            
-            databases.append({
-                'title': db_title,
-                'id': db_id
-            })
-        
-        return databases[0]["id"]
+        return search_results['results'][0]['id']
     
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        exit()
+    except APIResponseError as e:
+        print(f"[ERROR] Error while searching for database: {e}")
+        return None
 
 
 def format_date(date_str,  output_format="%Y-%m-%d %H:%M:%S"):
@@ -66,7 +49,7 @@ def format_date(date_str,  output_format="%Y-%m-%d %H:%M:%S"):
         return parsed_date.strftime(output_format)
     except ValueError as e:
         return f"Error parsing date: {e}"
-    
+
 
 def convert_html_to_notion_blocks(html_content):
     soup = BeautifulSoup(html_content, 'html.parser')
@@ -131,7 +114,7 @@ def convert_html_to_notion_blocks(html_content):
     return blocks
 
 
-def create_notion_page(notion, database_id, title, author, article_date, link, content):
+def create_notion_page(notion, database_id, title, author, tag, article_date, link, content):
     parsed_article_date = datetime.strptime(article_date, "%Y-%m-%d %H:%M:%S")
 
     page_properties = {
@@ -162,6 +145,11 @@ def create_notion_page(notion, database_id, title, author, article_date, link, c
         },
         "Link": {
             "url": link
+        },
+        "Category": {
+            "multi_select": [
+                {"name": tag}
+            ]
         }
     }
 
@@ -195,37 +183,75 @@ def does_page_exist(notion, database_id, page_title) -> bool:
     return True if query["results"] else False
 
 
+def archive_old_pages(notion, database_id):
+    one_week_date = datetime.now() - timedelta(weeks=1)
+
+    try:
+        query_result = notion.databases.query(
+            **{
+                "database_id": database_id,
+                "filter": {
+                    "property": "Article Date",
+                    "date": {
+                        "before": one_week_date.isoformat()
+                    }
+                }
+            }
+        ).get("results", [])
+    except APIResponseError as e:
+        print(f"[ERROR] Error while querying for pages: {e}")
+        return None
+
+    for page in query_result:
+        page_id = page["id"]
+        try:
+            notion.pages.update(
+                **{
+                    "page_id": page_id,
+                    "archived": True
+                }
+            )
+        except APIResponseError as e:
+            print(f"[ERROR] Error while archiving a page: {e}")
+            continue
+
+
 if __name__ == "__main__":
-    links = get_rss_flow_links()
+    links_with_tags = get_rss_links_with_tags("rss_links.json")
 
     notion, database_id = make_notion_connection()
 
     feedparser.USER_AGENT = "feedparser/6.0.11 +https://github.com/kurtmckee/feedparser/"
 
-    for link in links:
-        try:
-            feed = feedparser.parse(link)
-            if feed.entries.__len__() == 0:
-                continue
-        
-            for entry in feed.entries:
-                title = entry.title
-                author = entry.author
-                date = format_date(entry.published)
-                link = entry.link
-                content = entry.content[0].value
+    if notion and database_id:
+        for link_, tag_ in links_with_tags:
+            try:
+                feed = feedparser.parse(link_)
+                if feed.entries.__len__() == 0:
+                    continue
             
-            if not does_page_exist(notion, database_id, title):
-                create_notion_page(
-                    notion=notion,
-                    database_id=database_id,
-                    title=title,
-                    author=author,
-                    article_date=date,
-                    link=link,
-                    content=content
-                )
+                for entry in feed.entries:
+                    title = entry.title
+                    author = entry.author
+                    tag = tag_
+                    date = format_date(entry.published)
+                    link = entry.link
+                    content = entry.content[0].value
+                
+                if not does_page_exist(notion, database_id, title):
+                    create_notion_page(
+                        notion=notion,
+                        database_id=database_id,
+                        title=title,
+                        author=author,
+                        tag=tag,
+                        article_date=date,
+                        link=link,
+                        content=content
+                    )
 
-        except:
-            print("[ERROR] Error while parsing for link: ", link)
-            continue
+            except:
+                print("[ERROR] Error while parsing for link: ", link)
+                continue
+
+        archive_old_pages(notion, database_id)
