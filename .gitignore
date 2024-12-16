@@ -1,7 +1,6 @@
 # Personal gitignore remove
 rss-notion-venv/
 config.json
-rss_links.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

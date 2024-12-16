@@ -1,0 +1,23 @@
+{
+    "rss_feeds": {
+        "ia": [
+            "https://www.artificial-intelligence.blog/ai-news?format=rss",
+            "http://news.mit.edu/rss/topic/artificial-intelligence2",
+            "https://dailyai.com/feed/"
+        ],
+        "machine learning": [
+            "https://machinelearningmastery.com/feed/",
+            "http://news.mit.edu/rss/topic/machine-learning",
+            "http://feeds.feedburner.com/kdnuggets-data-mining-analytics"
+        ],
+        "data science": [
+            "https://towardsdatascience.com/feed",
+            "https://data-science-blog.com/en/feed",
+            "https://dataconomy.com/feed/"
+        ],
+        "tech news": [
+            "https://techcrunch.com/feed/",
+            "https://www.techrepublic.com/rssfeeds/articles/?feedType=rssfeeds&sort=latest"
+        ]
+    }
+}
