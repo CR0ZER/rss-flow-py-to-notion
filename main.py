@@ -45,7 +45,6 @@ def format_date(date_str,  output_format="%Y-%m-%d %H:%M:%S"):
     rss_format = "%a, %d %b %Y %H:%M:%S %z"
     try:
         parsed_date = datetime.strptime(date_str, rss_format)
-        # Format the date into the desired format
         return parsed_date.strftime(output_format)
     except ValueError as e:
         return f"Error parsing date: {e}"
@@ -103,7 +102,7 @@ def convert_html_to_notion_blocks(html_content):
         if element.name == "p":
             blocks.append(create_notion_paragraph(element.get_text()))
         elif element.name in ["h1", "h2", "h3"]:
-            level = int(element.name[1])  # Extract heading level
+            level = int(element.name[1])
             blocks.append(create_notion_heading(element.get_text(), level))
         elif element.name == "a":
             blocks.append(create_notion_link(element.get_text(), element.get("href")))
@@ -168,7 +167,7 @@ def create_notion_page(notion, database_id, title, author, tag, article_date, li
         return None
 
 
-def does_page_exist(notion, database_id, page_title) -> bool:
+def does_page_exist(notion, database_id, page_title):
     query = notion.databases.query(
         **{
             "database_id": database_id,
@@ -230,35 +229,35 @@ if __name__ == "__main__":
     feedparser.USER_AGENT = "feedparser/6.0.11 +https://github.com/kurtmckee/feedparser/"
 
     if notion and database_id:
-        # for link_, tag_ in links_with_tags:
-        #     try:
-        #         feed = feedparser.parse(link_)
-        #         if feed.entries.__len__() == 0:
-        #             print(f"[ERROR] No entries found for link: {link_}")
-        #             continue
+        for link_, tag_ in links_with_tags:
+            try:
+                feed = feedparser.parse(link_)
+                if feed.entries.__len__() == 0:
+                    print(f"[ERROR] No entries found for link: {link_}")
+                    continue
             
-        #         for entry in feed.entries:
-        #             title = entry.title
-        #             author = entry.author
-        #             tag = tag_
-        #             date = format_date(entry.published)
-        #             link = entry.link
-        #             content = entry.content[0].value
+                for entry in feed.entries:
+                    title = entry.title
+                    author = entry.author
+                    tag = tag_
+                    date = format_date(entry.published)
+                    link = entry.link
+                    content = entry.content[0].value if hasattr(entry, "content") else entry.summary
                 
-        #             if not does_page_exist(notion, database_id, title) and is_date_younger_than_week(date):
-        #                 create_notion_page(
-        #                     notion=notion,
-        #                     database_id=database_id,
-        #                     title=title,
-        #                     author=author,
-        #                     tag=tag,
-        #                     article_date=date,
-        #                     link=link,
-        #                     content=content
-        #                 )
+                    if not does_page_exist(notion, database_id, title) and is_date_younger_than_week(date):
+                        create_notion_page(
+                            notion=notion,
+                            database_id=database_id,
+                            title=title,
+                            author=author,
+                            tag=tag,
+                            article_date=date,
+                            link=link,
+                            content=content
+                        )
 
-        #     except:
-        #         print("[ERROR] Error while parsing for link: ", link)
-        #         continue
+            except:
+                print("[ERROR] Error while parsing for link: ", link)
+                continue
 
         archive_old_pages(notion, database_id)
