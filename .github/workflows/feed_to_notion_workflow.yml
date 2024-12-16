@@ -3,7 +3,7 @@ name: RSS Feed to Notion
 on:
   # Run daily at 1 AM UTC
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 0 * * *'
   
   # Manually trigger the workflow
   workflow_dispatch:
@@ -19,8 +19,8 @@ jobs:
       # Set up Python 3.12.1
       - name: Set up Python
       - uses: actions/setup-python@v4
-      with:
-        python-version: '3.12.1'
+        with:
+          python-version: '3.12.1'
 
       # Install dependencies
       - name: Install dependencies
