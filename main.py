@@ -147,9 +147,9 @@ def create_notion_page(notion, database_id, title, author, tag, article_date, li
             "url": link
         },
         "Category": {
-            "multi_select": [
-                {"name": tag}
-            ]
+            "select": {
+                "name": tag
+            }
         }
     }
 
@@ -211,9 +211,15 @@ def archive_old_pages(notion, database_id):
                     "archived": True
                 }
             )
+            print(f"[INFO] Page archived: {page['id']}")
         except APIResponseError as e:
             print(f"[ERROR] Error while archiving a page: {e}")
             continue
+
+
+def is_date_younger_than_week(date_str):
+    parsed_date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+    return parsed_date > datetime.now() - timedelta(weeks=1)
 
 
 if __name__ == "__main__":
@@ -224,34 +230,35 @@ if __name__ == "__main__":
     feedparser.USER_AGENT = "feedparser/6.0.11 +https://github.com/kurtmckee/feedparser/"
 
     if notion and database_id:
-        for link_, tag_ in links_with_tags:
-            try:
-                feed = feedparser.parse(link_)
-                if feed.entries.__len__() == 0:
-                    continue
+        # for link_, tag_ in links_with_tags:
+        #     try:
+        #         feed = feedparser.parse(link_)
+        #         if feed.entries.__len__() == 0:
+        #             print(f"[ERROR] No entries found for link: {link_}")
+        #             continue
             
-                for entry in feed.entries:
-                    title = entry.title
-                    author = entry.author
-                    tag = tag_
-                    date = format_date(entry.published)
-                    link = entry.link
-                    content = entry.content[0].value
+        #         for entry in feed.entries:
+        #             title = entry.title
+        #             author = entry.author
+        #             tag = tag_
+        #             date = format_date(entry.published)
+        #             link = entry.link
+        #             content = entry.content[0].value
                 
-                if not does_page_exist(notion, database_id, title):
-                    create_notion_page(
-                        notion=notion,
-                        database_id=database_id,
-                        title=title,
-                        author=author,
-                        tag=tag,
-                        article_date=date,
-                        link=link,
-                        content=content
-                    )
+        #             if not does_page_exist(notion, database_id, title) and is_date_younger_than_week(date):
+        #                 create_notion_page(
+        #                     notion=notion,
+        #                     database_id=database_id,
+        #                     title=title,
+        #                     author=author,
+        #                     tag=tag,
+        #                     article_date=date,
+        #                     link=link,
+        #                     content=content
+        #                 )
 
-            except:
-                print("[ERROR] Error while parsing for link: ", link)
-                continue
+        #     except:
+        #         print("[ERROR] Error while parsing for link: ", link)
+        #         continue
 
         archive_old_pages(notion, database_id)
