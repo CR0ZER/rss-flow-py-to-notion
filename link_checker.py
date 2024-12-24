@@ -1,4 +1,4 @@
-import json
+import sys
 from datetime import datetime, timedelta
 import feedparser
 
@@ -41,6 +41,10 @@ Content: {entry.content[0].value if hasattr(entry, "content") else entry.summary
 
 
 if __name__ == "__main__":
-    link = "http://feeds.feedburner.com/kdnuggets-data-mining-analytics"
+    if len(sys.argv) != 2:
+        print("Usage: python link_checker.py <link>")
+        sys.exit(1)
+
+    link = sys.argv[1]
 
     check_link(link)
