@@ -1,3 +1,9 @@
+###########################################
+# This project have been created by @CR0ZER
+# https://github.com/CR0ZER/
+###########################################
+
+
 import json
 from datetime import datetime, timedelta
 import feedparser
