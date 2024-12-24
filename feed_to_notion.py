@@ -96,6 +96,18 @@ def convert_html_to_notion_blocks(html_content):
             }
         }
 
+    def create_notion_image(url):
+        return {
+            "object": "block",
+            "type": "image",
+            "image": {
+                "type": "external",
+                "external": {
+                    "url": url
+                }
+            }
+        }
+
     blocks = []
 
     for element in soup.contents:
@@ -106,6 +118,8 @@ def convert_html_to_notion_blocks(html_content):
             blocks.append(create_notion_heading(element.get_text(), level))
         elif element.name == "a":
             blocks.append(create_notion_link(element.get_text(), element.get("href")))
+        elif element.name == "img" and element.get("src"):
+            blocks.append(create_notion_image(element.get("src")))
         else:
             if element.string:
                 blocks.append(create_notion_paragraph(element.string))
