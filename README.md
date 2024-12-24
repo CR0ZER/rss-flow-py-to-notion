@@ -1,22 +1,20 @@
-# RSS Feed to Notion Pages
+**Summary**
 
 This script parses articles chosen by the user from various categories (e.g., AI, ML, Tech, Sports, etc.) and creates a Notion page in a database for each article. The workflow is automated using GitHub Actions, allowing users to fetch and store RSS feed data in Notion effortlessly. If the article is one week old, the script will automatically delete the page.
 
-# Table of Contents
+**Table of Contents**
 
-- [RSS Feed to Notion Pages](#rss-feed-to-notion-pages)
-- [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Usage](#usage)
-    - [Run Locally](#run-locally)
-    - [Using GitHub Actions](#using-github-actions)
-    - [Configuration](#configuration)
-    - [Validate Links](#validate-links)
-  - [GitHub Actions Workflow](#github-actions-workflow)
-    - [Workflow Used/Example](#workflow-usedexample)
-  - [Contributing](#contributing)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Run Locally](#run-locally)
+  - [Using GitHub Actions](#using-github-actions)
+  - [Configuration](#configuration)
+  - [Validate Links](#validate-links)
+- [GitHub Actions Workflow](#github-actions-workflow)
+  - [Workflow Used/Example](#workflow-usedexample)
+- [Contributing](#contributing)
 
 ## Features
 
