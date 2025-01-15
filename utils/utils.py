@@ -84,7 +84,7 @@ class Notion:
             return None
 
 
-    def create_notion_page(notion, database_id, title, author, tag, article_date, link, content):
+    def create_notion_page(notion, database_id, title, author, tag, article_date, link, content, content_type):
         parsed_article_date = datetime.strptime(article_date, "%Y-%m-%d %H:%M:%S")
 
         page_properties = {
@@ -119,6 +119,11 @@ class Notion:
             "Category": {
                 "select": {
                     "name": tag
+                }
+            },
+            "Content Type": {
+                "select": {
+                    "name": content_type
                 }
             }
         }

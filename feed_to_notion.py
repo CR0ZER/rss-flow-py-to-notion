@@ -30,6 +30,12 @@ if __name__ == "__main__":
                     date = Tools.format_date(entry.published)
                     link = entry.link
                     content = entry.content[0].value if hasattr(entry, "content") else entry.summary
+                    if hasattr(entry, "content"):
+                        content = entry.content[0].value
+                        content_type = "Full article"
+                    else:
+                        content = entry.summary
+                        content_type = "Summary"
                 
                     if not Notion.does_page_exist(notion, database_id, title) and Tools.is_date_younger_than_week(date):
                         Notion.create_notion_page(
@@ -40,7 +46,8 @@ if __name__ == "__main__":
                             tag=tag,
                             article_date=date,
                             link=link,
-                            content=content
+                            content=content,
+                            content_type=content_type
                         )
 
             except:

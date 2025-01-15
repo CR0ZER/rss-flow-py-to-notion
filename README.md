@@ -58,15 +58,16 @@ pip install -r requirements.txt
 
 To use the script, you will have to manually add these properties in your database:
 - Change the `Name` property to `Title`.
-- `Category` - Property type: *Select*.
+- `Category` - Property type: *Select* - Options: `tech news`, `data science`, `machine learning`, `ai`.
+- `Content Type` - Property type: *Select* - Options: `Full article`, `Summary`.
 - `Author` - Property type: *Text*.
 - `Article Date` - Property type: *Date*.
 - `Created Time` - Property type: *Created Time* (automatic property for page creation date).
 - `Link` - Property type: *URL*.
 
-*Do not change property names.*
+*Do not change property's names.*
 
-*You can also add more properties, like a `Read` checkbox, but the script will not fill them.*
+*You can also add more properties in your Notion database, but the script will not fill them.*
 
 ### Run Locally
 
@@ -103,7 +104,7 @@ To update your RSS feed links, modify your `rss_links.json` structure as follows
 }
 ```
 
-*Do not forget to add subjects in the `Category` property in your Notion database.*
+*Do not forget to add or change subjects in the `Category` property in your Notion database.*
 
 ### Validate Links
 
